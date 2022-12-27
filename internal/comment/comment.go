@@ -14,6 +14,9 @@ var (
 // Store - all methods needed to operate by interacting with repository layer
 type Store interface {
 	GetComment(context.Context, string) (Comment, error)
+	PostComment(context.Context, Comment) (Comment, error)
+	UpdateComment(ctx context.Context, id string, Comment) (Comment, error)
+	DeleteComment(ctx context.Context, id string) error
 }
 
 type Comment struct {
@@ -45,14 +48,26 @@ func (s *Service) GetComment(ctx context.Context, id string) (Comment, error) {
 	return cmt, nil
 }
 
-func (s *Service) UpdateComment(ctx context.Context, id string) error {
-	return ErrNotImplemented
+func (s *Service) UpdateComment(ctx context.Context, id string, cmt Comment) (Comment, error) {
+	updated, err := s.Store.UpdateComment(ctx, id, cmt)
+	if err != nil {
+		return Comment{}, err
+	}
+	return updated, nil
 }
 
 func (s *Service) DeleteComment(ctx context.Context, id string) error {
-	return ErrNotImplemented
+	err := s.Store.DeleteComment(ctx, id)
+	if err != nil {
+		return err
+	}
+	return nil
 }
 
-func (s *Service) CreateComment(ctx context.Context, id string) (Comment, error) {
-	return Comment{}, ErrNotImplemented
+func (s *Service) PostComment(ctx context.Context, cmt Comment) (Comment, error) {
+	inserted, err := s.Store.PostComment(ctx, cmt)
+	if err != nil {
+		return Comment{}, err
+	}
+	return inserted, nil
 }

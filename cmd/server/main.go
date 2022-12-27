@@ -24,7 +24,18 @@ func Run() error {
 	}
 
 	cmtService := comment.NewService(db)
-	fmt.Println(cmtService.GetComment(context.Background(), "71c5d074-b6cf-11ec-b909-0242ac120002"))
+	fmt.Println(cmtService.GetComment(context.Background(), "446aca87-32b0-4af5-a715-7ab4a3b13a56"))
+
+	// cmtService.PostComment(context.Background(), comment.Comment{
+	// 	Slug:   "test",
+	// 	Body:   "bodyy",
+	// 	Author: "authorr",
+	// })
+
+	cmtService.UpdateComment(context.Background(), "446aca87-32b0-4af5-a715-7ab4a3b13a56")
+
+	cmtService.DeleteComment(context.Background(), "446aca87-32b0-4af5-a715-7ab4a3b13a56")
+
 	return nil
 }
 
