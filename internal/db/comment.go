@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
+	"log"
 
 	"github.com/bajalnyt/go-rest-api-course/internal/comment"
 	"github.com/google/uuid"
@@ -26,6 +27,27 @@ func convertCommentRowToComment(c CommentRow) comment.Comment {
 
 }
 
+func (d *Database) GetComments(
+	ctx context.Context,
+) ([]comment.Comment, error) {
+	var cmtRow CommentRow
+	var comments []comment.Comment
+	rows, err := d.Client.Query(`SELECT id ,slug, author, body from comments`)
+	if err != nil {
+		return []comment.Comment{}, fmt.Errorf("error fetching comments %w", err)
+	}
+	defer rows.Next()
+
+	for rows.Next() {
+		if err := rows.Scan(&cmtRow.ID, &cmtRow.Slug, &cmtRow.Author, &cmtRow.Body); err != nil {
+			log.Fatal(err)
+		}
+		comments = append(comments, convertCommentRowToComment(cmtRow))
+	}
+
+	return comments, nil
+}
+
 func (d *Database) GetComment(
 	ctx context.Context,
 	uuid string,
@@ -39,7 +61,7 @@ func (d *Database) GetComment(
 		return comment.Comment{}, fmt.Errorf("error fetching comment by uuid %w", err)
 	}
 
-	return comment.Comment{}, nil
+	return convertCommentRowToComment(cmtRow), nil
 }
 
 func (d *Database) PostComment(
@@ -69,7 +91,8 @@ func (d *Database) PostComment(
 	if err := rows.Close(); err != nil {
 		return comment.Comment{}, err
 	}
-	return cmt, nil
+
+	return convertCommentRowToComment(postRow), nil
 }
 
 // UpdateComment - updates a comment in the database
