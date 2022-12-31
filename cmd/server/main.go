@@ -1,40 +1,34 @@
 package main
 
 import (
-	"context"
 	"fmt"
 
 	"github.com/bajalnyt/go-rest-api-course/internal/comment"
 	"github.com/bajalnyt/go-rest-api-course/internal/db"
+	transportHttp "github.com/bajalnyt/go-rest-api-course/internal/transport/http"
 )
 
 // Run instantiates and starts the app
 func Run() error {
 	fmt.Println("Starting up application")
 
-	db, err := db.NewDatabase()
+	mydb, err := db.NewDatabase()
 	if err != nil {
 		fmt.Println("Failed to connect to database")
 		return err
 	}
 
-	if err := db.MigrateDB(); err != nil {
+	if err := mydb.MigrateDB(); err != nil {
 		fmt.Println("Failed to migrate database")
 		return err
 	}
 
-	cmtService := comment.NewService(db)
-	fmt.Println(cmtService.GetComment(context.Background(), "446aca87-32b0-4af5-a715-7ab4a3b13a56"))
+	cmtService := comment.NewService(mydb)
 
-	// cmtService.PostComment(context.Background(), comment.Comment{
-	// 	Slug:   "test",
-	// 	Body:   "bodyy",
-	// 	Author: "authorr",
-	// })
-
-	cmtService.UpdateComment(context.Background(), "446aca87-32b0-4af5-a715-7ab4a3b13a56")
-
-	cmtService.DeleteComment(context.Background(), "446aca87-32b0-4af5-a715-7ab4a3b13a56")
+	httpHandler := transportHttp.NewHandler(cmtService)
+	if err := httpHandler.Serve(); err != nil {
+		return err
+	}
 
 	return nil
 }

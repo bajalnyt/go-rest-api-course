@@ -15,8 +15,10 @@ var (
 type Store interface {
 	GetComment(context.Context, string) (Comment, error)
 	PostComment(context.Context, Comment) (Comment, error)
-	UpdateComment(ctx context.Context, id string, Comment) (Comment, error)
-	DeleteComment(ctx context.Context, id string) error
+	UpdateComment(context.Context, string, Comment) (Comment, error)
+	DeleteComment(context.Context, string) error
+
+	GetComments(context.Context) ([]Comment, error)
 }
 
 type Comment struct {
@@ -44,6 +46,17 @@ func (s *Service) GetComment(ctx context.Context, id string) (Comment, error) {
 	if err != nil {
 		fmt.Println(err)
 		return Comment{}, ErrFetchingComment
+	}
+	return cmt, nil
+}
+
+func (s *Service) GetComments(ctx context.Context) ([]Comment, error) {
+	fmt.Println("retrieving all comments")
+
+	cmt, err := s.Store.GetComments(ctx)
+	if err != nil {
+		fmt.Println(err)
+		return []Comment{}, ErrFetchingComment
 	}
 	return cmt, nil
 }
